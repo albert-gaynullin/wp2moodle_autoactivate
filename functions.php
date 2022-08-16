@@ -1,3 +1,4 @@
+<?php
 add_action( 'woocommerce_order_status_completed', 'auto_activate', 10, 1);
 function auto_activate( $order_id ) {
 	$order = wc_get_order( $order_id );
@@ -7,9 +8,6 @@ function auto_activate( $order_id ) {
 	foreach ($downloads as $download) {
 		$activate_url = get_wp2moodle_activate_url($download["download_url"], $user);
 		file_get_contents($activate_url);
-		$data = $activate_url;
-		$filename = 'output.txt';
-	    file_put_contents($filename, $data);
 		curl_close($curl);
 	}
 }
@@ -71,3 +69,4 @@ function wp2moodle_generate_activate_hyperlink($user, $cohort,$group,$course,$ac
 	return rtrim(get_option('wp2m_moodle_url'),"/").WP2M_MOODLE_PLUGIN_URL.encrypt_string($details, get_option('wp2m_shared_secret'));
 	//return get_option('wp2m_moodle_url').WP2M_MOODLE_PLUGIN_URL.'=>'.$details;
 }
+?>
