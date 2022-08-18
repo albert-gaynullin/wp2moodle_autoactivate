@@ -4,18 +4,16 @@ function auto_activate( $order_id ) {
 	$order = wc_get_order( $order_id );
 	$downloads = $order->get_downloadable_items();
 	$user_id = $order->get_user_id();
-	$user = get_userdata( $user_id );
+	$user = get_user_by('id', $user_id);
 	foreach ($downloads as $download) {
-		$activate_url = get_wp2moodle_activate_url($download["download_url"], $user);
+		$activate_url = get_wp2moodle_activate_url($download["download_url"], $user_id);
 		file_get_contents($activate_url);
-		curl_close($curl);
 	}
 }
 
-function get_wp2moodle_activate_url($url, $user) {
+function get_wp2moodle_activate_url($url, $user_id) {
 
 	if (strpos($url, 'wp2moodle.txt') !== false) {
-		// mp url is full url = including http:// and so on... we want the file url
 		$path = $_SERVER['DOCUMENT_ROOT'] . parse_url($url)["path"];
 		$cohort = "";
 		$group = "";
@@ -45,7 +43,7 @@ function get_wp2moodle_activate_url($url, $user) {
 function wp2moodle_generate_activate_hyperlink($user, $cohort,$group,$course,$activity = 0) {
 
 	$update = get_option('wp2m_update_details') ?: "true";
-
+	
     $enc = array(
 		"offset" => rand(1234,5678),						// just some junk data to mix into the encryption
 		"stamp" => time(),									// unix timestamp so we can check that the link isn't expired
@@ -61,10 +59,8 @@ function wp2moodle_generate_activate_hyperlink($user, $cohort,$group,$course,$ac
 		"updatable" => $update,								// if user profile fields can be updated in moodle
 		"activity" => $activity						// index of first [visible] activity to go to, if auto-open is enabled in moodle
 	);
-
 	// encode array as querystring
 	$details = http_build_query($enc);
-
 	// encryption = 3des using shared_secret
 	return rtrim(get_option('wp2m_moodle_url'),"/").WP2M_MOODLE_PLUGIN_URL.encrypt_string($details, get_option('wp2m_shared_secret'));
 	//return get_option('wp2m_moodle_url').WP2M_MOODLE_PLUGIN_URL.'=>'.$details;
